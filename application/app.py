@@ -45,10 +45,7 @@ async def print_recived_messages(request: Request) -> tuple:
     data = json.loads(b_data.decode("utf-8"))
     print(data)
     try:
-        if data["messageData"].get("textMessageData"):
-            message = data["messageData"]["textMessageData"]["textMessage"]
-        else:
-            message = data["messageData"]["extendedTextMessageData"]["text"]
+        message = data["messageData"]["textMessageData"]["textMessage"]
     except KeyError:
         return "Send by bot successfully", 200
     data = {"message": message, "chatId": data["senderData"]["chatId"]}
