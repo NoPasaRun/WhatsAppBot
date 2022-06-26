@@ -2,7 +2,7 @@ from fastapi import FastAPI, requests, Request
 import json
 from application.database import engine, Base, session
 from sqlalchemy import select
-from models import Message
+from application.models import Message
 
 
 app = FastAPI()
