@@ -1,12 +1,13 @@
 import os
-from fastapi import FastAPI, requests, Request
+import aiohttp
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import json
 from application.database import engine, Base, session
 from sqlalchemy import select
 from application.models import Message, User
-from application.settings import root
+from application.settings import root, config
 
 
 app = FastAPI()
@@ -42,4 +43,8 @@ async def admin_panel():
 async def print_recived_messages(request: Request) -> tuple:
     b_data = await request.body()
     data = json.loads(b_data.decode("utf-8"))
-    return "Successful", 200
+    data = {"message": data["message"], "chatId": data["chatId"]}
+    url = f"https://api.green-api.com/waInstance{config['IdInstance']}/SendMessage/{config['apiTokenInstance']}"
+    http_session = aiohttp.ClientSession()
+    response = await http_session.post(url=url, data=data)
+    return response.content, response.status
