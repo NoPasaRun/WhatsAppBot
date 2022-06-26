@@ -7,3 +7,10 @@ class Message(Base):
     id: int = Column(Integer(), primary_key=True)
     client_reply: str = Column(String(250))
     bot_replies: iter = Column(ARRAY(String, dimensions=None))
+
+
+class User(Base):
+    __tablename__ = "users"
+    id: int = Column(Integer(), primary_key=True)
+    phone_number = Column(String(11))
+    name = Column(String(100))

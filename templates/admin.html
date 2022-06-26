@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/static/styles/normalize.css">
+    <link rel="stylesheet" href="/static/styles/admin.css">
+    <title>Админка</title>
+</head>
+<body>
+    <header class="header">
+        <div class="wrapper wrapper_row-content">
+            <h2 class="headers__heading">Админ панель</h2>
+            <div class="header__intro-content">
+                <nav class="headers__nav">
+                    <ul class="header-nav__list">
+                        <li class="headers-nav__item">
+                            <a href="/docs" class="headers-nav__link">
+                                Документация
+                            </a>
+                        </li>
+                        <li class="headers-nav__item">
+                            <a href="/send_message" class="headers-nav__link">
+                                Отправить сообщения
+                            </a>
+                        </li>
+                        <li class="headers-nav__item">
+                            <a href="/modify_replies" class="headers-nav__link">
+                                Настроить ответы бота
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+    <main class="main">
+        <section class="main-section">
+            <div class="wrapper">
+                <h3 class="main-section__header">Пользователи</h3>
+                <ul class="main-section__user-list">
+                    {% for user in users %}
+                        <div class="user-info">
+                            <ul class="user-info__list">
+                                <li class="user-info__item">Идентификатор: {{user.id}}</li>
+                                <li class="user-info__item">Имя: {{user.name}}</li>
+                                <li class="user-info__item">Номер телефона: {{user.phone_number}}</li>
+                                <li class="user-info__item">
+                                    <button class="user-info__delete-button"></button>
+                                </li>
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </ul>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
