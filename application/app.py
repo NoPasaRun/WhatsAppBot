@@ -44,7 +44,7 @@ async def print_recived_messages(request: Request) -> tuple:
     b_data = await request.body()
     data = json.loads(b_data.decode("utf-8"))
     print(data)
-    data = {"message": data["message"], "chatId": data["chatId"]}
+    data = {"message": data["messageData"]["textMessageData"]["textMessage"], "chatId": data["senderData"]["chatId"]}
     url = f"https://api.green-api.com/waInstance{config['IdInstance']}/SendMessage/{config['apiTokenInstance']}"
     http_session = aiohttp.ClientSession()
     response = await http_session.post(url=url, data=data)
