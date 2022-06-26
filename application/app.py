@@ -1,6 +1,6 @@
 from fastapi import FastAPI, requests, Request
 import json
-from database import engine, Base, session
+from application.database import engine, Base, session
 from sqlalchemy import select
 from models import Message
 
