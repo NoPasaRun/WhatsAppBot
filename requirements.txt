@@ -8,3 +8,5 @@ gunicorn~=20.1.0
 python-dotenv~=0.20.0
 aiohttp~=3.8.1
 jinja2
+sqlalchemy-utils~=0.38.2
+psycopg2-binary~=2.9.3
