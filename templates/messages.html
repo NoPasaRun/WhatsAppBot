@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <main>
+        <section>
+            <div class="wrapper">
+                <div class="tree">
+                </div>
+                <div id="message_data" value="{{ message_data }}" hidden></div>
+            </div>
+        </section>
+    </main>
+    <script type="application/javascript">
+        const data = JSON.parse($("#message_data").attr("value"))
+        const tree = document.querySelector(".tree")
+
+        const top_offset = 10
+
+        function create_tree(obj, left) {
+
+            let node = document.createElement("div");
+
+            let form = document.createElement("form");
+
+            let user_phrase_label = document.createElement("label")
+            let user_phrase = document.createElement("input")
+
+            let bot_reply_label = document.createElement("label")
+            let bot_reply = document.createElement("input")
+
+            let id_input = document.createElement("input")
+
+            let send_button = document.createElement("input")
+
+            let add_message_button = document.createElement("button")
+            add_message_button.innerText = "Create"
+            let delete_message_button = document.createElement("button")
+            delete_message_button.innerText = "Delete"
+
+            user_phrase.addEventListener('input', function (evt) {
+                $(send_button).attr({"hidden": false})
+            });
+
+            bot_reply.addEventListener('input', function (evt) {
+                $(send_button).attr({"hidden": false})
+            });
+
+            add_message_button.addEventListener("click", function (ev) {
+                return fetch("/create_message",
+                    {method: "POST",
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({"path_id": obj.path_id})});
+            })
+
+            delete_message_button.addEventListener("click", function (ev) {
+                return fetch("/delete_message",
+                    {method: "POST",
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({"path_id": obj.path_id})}
+                )
+            })
+
+            node.append(form, add_message_button, delete_message_button)
+            form.append(user_phrase_label, user_phrase,
+                        bot_reply_label, bot_reply,
+                        id_input, send_button)
+
+            user_phrase_label.innerText = "User: "
+            bot_reply_label.innerText = "Bot: "
+
+            $(send_button).attr({"type": "submit", "value": "Update", "hidden": true, "class": "form-tree__send-button"})
+
+            $(form).attr({"method": "post", "action": "/update_message", "class": "form-tree"})
+            $(form).css({"display": "inline-block"})
+
+            $(user_phrase).attr({"value": obj.user_phrase, "name": "user_phrase"})
+            $(bot_reply).attr({"value": obj.bot_reply, "name": "bot_reply"})
+
+            $(id_input).attr({"value": obj.id, "name": "id", "hidden": true})
+
+            $(node).attr({"path_id": obj.path_id})
+            $(node).css({"margin-left": left+10+"px", "display": "block", "margin-top": top_offset+"px"})
+
+            for (let i in obj.children) {
+
+                node.appendChild(create_tree(obj.children[i], left+10));
+
+            }
+
+            return node
+        }
+
+        for (let i = 0; i < data.length; i++) {
+            tree.appendChild(create_tree(data[i], 0))
+        }
+        const create_tree_button = document.createElement("button")
+        tree.appendChild(create_tree_button)
+        create_tree_button.innerText = "Add message tree"
+        create_tree_button.addEventListener("click", function (ev) {
+            return fetch("/create_message",
+                {method: "POST",
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({"path_id": NaN})});
+        })
+    </script>
+</body>
+</html>

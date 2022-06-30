@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from application.settings import config
 
 
-database_url = config["DATABASE_URL"]
+database_url = config["TEST_DATABASE_URL"]
 sync_database_url = database_url.replace("+asyncpg", "")
 
 engine = create_engine(sync_database_url, echo=True)

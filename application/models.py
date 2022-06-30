@@ -10,20 +10,22 @@ id_seq = Sequence('messages_id_seq')
 class Message(Base):
     __tablename__ = "messages"
     id: int = Column(Integer(), id_seq, primary_key=True)
-    clue_word: str = Column(String())
+    user_phrase: str = Column(String())
+    bot_reply: str = Column(String())
     path = Column(LtreeType(), nullable=False)
     parent = relationship(
                 'Message',
+                cascade="all,delete",
                 primaryjoin=(remote(path) == foreign(func.subpath(path, 0, -1))),
-                backref='bot_replies',
-                viewonly=True
+                backref='children'
             )
 
-    def __init__(self, clue_word, parent=None):
+    def __init__(self, user_phrase: str = "", bot_reply: str = "", parent=None):
         super().__init__()
         _id = engine.execute(id_seq)
         self.id = _id
-        self.clue_word = clue_word
+        self.user_phrase = user_phrase
+        self.bot_reply = bot_reply
         ltree_id = Ltree(str(_id))
         self.path = ltree_id if parent is None else parent.path + ltree_id
 
