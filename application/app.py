@@ -171,7 +171,7 @@ async def get_recived_messages(request: Request) -> tuple:
 
     await session.execute(insert(User).values({"phone_number": phone_number}))
 
-    message = get_message_from_bd(message)
+    message = await get_message_from_bd(message)
 
     message_data = {"message": message, "chatId": phone_number + "@c.us"}
 
