@@ -169,7 +169,7 @@ async def get_recived_messages(request: Request) -> tuple:
 
         return "Send by bot successfully", 200
 
-    await session.execute(insert(User).values({"phone_number": phone_number}))
+    # await session.execute(insert(User).values({"phone_number": phone_number}))
 
     message = await get_message_from_bd(message)
 
