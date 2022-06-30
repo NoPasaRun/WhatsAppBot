@@ -1,5 +1,5 @@
 import os
-from typing import Type
+from typing import Type, Callable
 import starlette.status as status
 import aiohttp
 from fastapi import FastAPI, Request, APIRouter, Form
@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse, Response
 import json
-from application.database import async_engine, Base, session
+from application.database import async_engine, Base, async_session
 from sqlalchemy import select, insert, update, delete, func
 from application.models import Message, User, Ltree
 from application.settings import root, config
@@ -33,7 +33,7 @@ async def shutdown():
 @router.route("/admin", methods=["GET", "POST"])
 async def admin_panel(request: Request) -> templates.TemplateResponse:
     users = []
-
+    session = async_session()
     if request.method == "GET":
 
         output = await session.execute(select(User))
@@ -48,7 +48,7 @@ async def admin_panel(request: Request) -> templates.TemplateResponse:
         output = await session.execute(select(User))
 
         users = [user for raw in output.fetchall() for user in raw]
-
+    await session.close()
     return templates.TemplateResponse(
         "admin.html", {
             "request": request,
@@ -76,10 +76,13 @@ def list_to_data(data_list: list, data: list, dot_count: int = 0, path: str = ""
 @router.route("/bot_config", methods=["GET"])
 async def bot_configuration(request: Request) -> templates.TemplateResponse:
 
+    session = async_session()
     output = await session.execute(select(Message))
 
     messages = [message for raw in output.fetchall() for message in raw]
     messages = list_to_data(messages, [])
+
+    await session.close()
     return templates.TemplateResponse(
         "messages.html",
         {
@@ -91,6 +94,8 @@ async def bot_configuration(request: Request) -> templates.TemplateResponse:
 
 @router.post("/create_message")
 async def create_message(request: Request):
+
+    session = async_session()
 
     b_data = await request.body()
     data = json.loads(b_data.decode("utf-8"))
@@ -105,6 +110,7 @@ async def create_message(request: Request):
     session.add(message)
 
     await session.commit()
+    await session.close()
 
     return RedirectResponse(url="/bot_config", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -112,7 +118,9 @@ async def create_message(request: Request):
 @router.post("/update_message")
 async def update_message(id: int = Form(), user_phrase: str = Form(), bot_reply: str = Form()):
 
-    if all([id, user_phrase, bot_reply]):
+    session = async_session()
+
+    if all([True]):
         await session.execute(
             update(Message).where(Message.id == id).values(
                 {
@@ -121,13 +129,16 @@ async def update_message(id: int = Form(), user_phrase: str = Form(), bot_reply:
                 }
             )
         )
-
+        await session.commit()
+        await session.close()
         return RedirectResponse(url="/bot_config", status_code=status.HTTP_303_SEE_OTHER)
     return Response("Frontend form was changed", status_code=400)
 
 
 @router.post("/delete_message")
 async def delete_message(request: Request):
+
+    session = async_session()
 
     b_data = await request.body()
     data = json.loads(b_data.decode("utf-8"))
@@ -140,10 +151,12 @@ async def delete_message(request: Request):
     await session.execute(delete(Message).where(Message.id.in_(message_ids)))
     await session.commit()
 
+    await session.close()
+
     return RedirectResponse(url="/bot_config", status_code=status.HTTP_303_SEE_OTHER)
 
 
-async def get_message_from_bd(text):
+async def get_message_from_bd(text, session):
     output = await session.execute(select(Message).where(Message.user_phrase == text))
     result = output.fetchone()
     if result:
@@ -157,12 +170,16 @@ async def get_message_from_bd(text):
 
 @router.post("/recived_messages")
 async def get_recived_messages(request: Request) -> tuple:
+
+    session = async_session()
+
     b_data = await request.body()
     data = json.loads(b_data.decode("utf-8"))
 
     try:
 
         message = data["messageData"]["textMessageData"]["textMessage"]
+        print(message)
         phone_number = data["senderData"]["chatId"].replace("@c.us", "")
 
     except KeyError:
@@ -171,7 +188,7 @@ async def get_recived_messages(request: Request) -> tuple:
 
     # await session.execute(insert(User).values({"phone_number": phone_number}))
 
-    message = await get_message_from_bd(message)
+    message = await get_message_from_bd(message, session)
 
     message_data = {"message": message, "chatId": phone_number + "@c.us"}
 
@@ -180,6 +197,8 @@ async def get_recived_messages(request: Request) -> tuple:
     async with aiohttp.ClientSession() as http_session:
         async with http_session.post(url=url, data=json.dumps(message_data)) as response:
             content = await response.text()
+
+    await session.close()
 
     return content, response.status
 

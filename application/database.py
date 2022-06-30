@@ -15,5 +15,4 @@ Sync_session = sessionmaker(async_engine)
 sync_session = Sync_session()
 
 async_session = sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession)
-session = async_session()
 Base = declarative_base()
