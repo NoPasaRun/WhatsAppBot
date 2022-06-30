@@ -30,10 +30,20 @@ async def shutdown():
     await async_engine.dispose()
 
 
+def close_session(func: Callable):
+    async def wrapper(*args, **kwargs):
+        session = async_session()
+        args = (session, *args)
+        output = await func(*args, **kwargs)
+        await session.close()
+        return output
+    return wrapper
+
+
 @router.route("/admin", methods=["GET", "POST"])
-async def admin_panel(request: Request) -> templates.TemplateResponse:
+@close_session
+async def admin_panel(session: async_session, request: Request) -> templates.TemplateResponse:
     users = []
-    session = async_session()
     if request.method == "GET":
 
         output = await session.execute(select(User))
@@ -48,7 +58,7 @@ async def admin_panel(request: Request) -> templates.TemplateResponse:
         output = await session.execute(select(User))
 
         users = [user for raw in output.fetchall() for user in raw]
-    await session.close()
+
     return templates.TemplateResponse(
         "admin.html", {
             "request": request,
@@ -74,15 +84,14 @@ def list_to_data(data_list: list, data: list, dot_count: int = 0, path: str = ""
 
 
 @router.route("/bot_config", methods=["GET"])
-async def bot_configuration(request: Request) -> templates.TemplateResponse:
+@close_session
+async def bot_configuration(session: async_session, request: Request) -> templates.TemplateResponse:
 
-    session = async_session()
     output = await session.execute(select(Message))
 
     messages = [message for raw in output.fetchall() for message in raw]
     messages = list_to_data(messages, [])
 
-    await session.close()
     return templates.TemplateResponse(
         "messages.html",
         {
@@ -92,10 +101,9 @@ async def bot_configuration(request: Request) -> templates.TemplateResponse:
     )
 
 
-@router.post("/create_message")
-async def create_message(request: Request):
-
-    session = async_session()
+@router.route("/create_message", methods=["POST"])
+@close_session
+async def create_message(session: async_session, request: Request):
 
     b_data = await request.body()
     data = json.loads(b_data.decode("utf-8"))
@@ -110,7 +118,6 @@ async def create_message(request: Request):
     session.add(message)
 
     await session.commit()
-    await session.close()
 
     return RedirectResponse(url="/bot_config", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -120,7 +127,7 @@ async def update_message(id: int = Form(), user_phrase: str = Form(), bot_reply:
 
     session = async_session()
 
-    if all([True]):
+    if all([id, user_phrase, bot_reply]):
         await session.execute(
             update(Message).where(Message.id == id).values(
                 {
@@ -131,14 +138,14 @@ async def update_message(id: int = Form(), user_phrase: str = Form(), bot_reply:
         )
         await session.commit()
         await session.close()
+
         return RedirectResponse(url="/bot_config", status_code=status.HTTP_303_SEE_OTHER)
     return Response("Frontend form was changed", status_code=400)
 
 
-@router.post("/delete_message")
-async def delete_message(request: Request):
-
-    session = async_session()
+@router.route("/delete_message", methods=["POST"])
+@close_session
+async def delete_message(session: async_session, request: Request):
 
     b_data = await request.body()
     data = json.loads(b_data.decode("utf-8"))
@@ -150,8 +157,6 @@ async def delete_message(request: Request):
     message_ids = [message.id for row in output.fetchall() for message in row]
     await session.execute(delete(Message).where(Message.id.in_(message_ids)))
     await session.commit()
-
-    await session.close()
 
     return RedirectResponse(url="/bot_config", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -168,10 +173,9 @@ async def get_message_from_bd(text, session):
     return output_text
 
 
-@router.post("/recived_messages")
-async def get_recived_messages(request: Request) -> tuple:
-
-    session = async_session()
+@router.route("/recived_messages", methods=["POST"])
+@close_session
+async def get_recived_messages(session: async_session, request: Request) -> tuple:
 
     b_data = await request.body()
     data = json.loads(b_data.decode("utf-8"))
@@ -197,8 +201,7 @@ async def get_recived_messages(request: Request) -> tuple:
     async with aiohttp.ClientSession() as http_session:
         async with http_session.post(url=url, data=json.dumps(message_data)) as response:
             content = await response.text()
-
-    await session.close()
+            print(content)
 
     return content, response.status
 
