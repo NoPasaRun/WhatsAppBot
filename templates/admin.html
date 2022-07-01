@@ -22,12 +22,7 @@
                             </a>
                         </li>
                         <li class="headers-nav__item">
-                            <a href="/send_message" class="headers-nav__link">
-                                Отправить сообщения
-                            </a>
-                        </li>
-                        <li class="headers-nav__item">
-                            <a href="/modify_replies" class="headers-nav__link">
+                            <a href="/bot_config" class="headers-nav__link">
                                 Настроить ответы бота
                             </a>
                         </li>
@@ -40,12 +35,13 @@
         <section class="main-section">
             <div class="wrapper">
                 <h3 class="main-section__header">Пользователи</h3>
+                <form method="post"><input type="submit" value="Выгрузить в Excel"/></form>
                 <ul class="main-section__user-list">
                     {% for user in users %}
                         <div class="user-info">
                             <ul class="user-info__list">
                                 <li class="user-info__item">Идентификатор: {{user.id}}</li>
-                                <li class="user-info__item">Имя: {{user.name}}</li>
+                                <li class="user-info__item">Имя: {{user.username}}</li>
                                 <li class="user-info__item">Номер телефона: {{user.phone_number}}</li>
                                 <li class="user-info__item">
                                     <button class="user-info__delete-button"></button>

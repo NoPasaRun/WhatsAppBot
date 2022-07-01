@@ -6,11 +6,13 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="https://code.jquery.com/jquery-3.6.0.slim.js"></script>
+    <link rel="stylesheet" href="/static/styles/normalize.css">
+    <link rel="stylesheet" href="/static/styles/messages.css">
     <title>Document</title>
 </head>
 <body>
-    <main>
-        <section>
+    <main class="main">
+        <section class="main-section">
             <div class="wrapper">
                 <div class="tree">
                 </div>
@@ -22,53 +24,73 @@
         const data = JSON.parse($("#message_data").attr("value"))
         const tree = document.querySelector(".tree")
 
-        const top_offset = 10
-
         function create_tree(obj, left) {
 
             let node = document.createElement("div");
 
+            let node_wrapper = document.createElement("div")
+            $(node_wrapper).attr({"class": "tree-node__wrapper"})
+
+            let node_container = document.createElement("div")
+            $(node_container).attr({"class": "tree-node__container"})
+
+
+            let line = document.createElement("hr")
+
             let form = document.createElement("form");
 
             let user_phrase_label = document.createElement("label")
-            let user_phrase = document.createElement("input")
+            $(user_phrase_label).attr({"class": "form-label"})
+            let user_phrase = document.createElement("textarea")
 
             let bot_reply_label = document.createElement("label")
-            let bot_reply = document.createElement("input")
+            $(bot_reply_label).attr({"class": "form-label"})
+            let bot_reply = document.createElement("textarea")
 
             let id_input = document.createElement("input")
 
             let send_button = document.createElement("input")
 
             let add_message_button = document.createElement("button")
-            add_message_button.innerText = "Create"
+            $(add_message_button).attr({"class": "create-button"})
+
+
             let delete_message_button = document.createElement("button")
-            delete_message_button.innerText = "Delete"
+            $(delete_message_button).attr({"class": "delete-button"})
 
             user_phrase.addEventListener('input', function (evt) {
                 $(send_button).attr({"hidden": false})
+                $(add_message_button).attr({"hidden": true})
+                $(delete_message_button).attr({"hidden": true})
             });
 
             bot_reply.addEventListener('input', function (evt) {
                 $(send_button).attr({"hidden": false})
+                $(add_message_button).attr({"hidden": true})
+                $(delete_message_button).attr({"hidden": true})
+
             });
 
             add_message_button.addEventListener("click", function (ev) {
                 return fetch("/create_message",
                     {method: "POST",
                         headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({"path_id": obj.path_id})});
+                        body: JSON.stringify({"path_id": obj.path_id})}
+                ).then(() => {window.location.reload()})
             })
 
             delete_message_button.addEventListener("click", function (ev) {
                 return fetch("/delete_message",
-                    {method: "POST",
+                    {method: "DELETE",
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({"path_id": obj.path_id})}
-                )
+                ).then(() => {window.location.reload()})
             })
 
-            node.append(form, add_message_button, delete_message_button)
+            node.appendChild(node_wrapper)
+            node_wrapper.append(node_container, line)
+            node_container.append(form, add_message_button, 
+                                    delete_message_button)
             form.append(user_phrase_label, user_phrase,
                         bot_reply_label, bot_reply,
                         id_input, send_button)
@@ -76,22 +98,23 @@
             user_phrase_label.innerText = "User: "
             bot_reply_label.innerText = "Bot: "
 
-            $(send_button).attr({"type": "submit", "value": "Update", "hidden": true, "class": "form-tree__send-button"})
+            $(send_button).attr({"type": "submit", "value": "", "hidden": true, "class": "form-tree__send-button"})
 
-            $(form).attr({"method": "post", "action": "/update_message", "class": "form-tree"})
-            $(form).css({"display": "inline-block"})
+            $(form).attr({"method": "POST", "action": "/update_message", "class": "form-tree"})
 
-            $(user_phrase).attr({"value": obj.user_phrase, "name": "user_phrase"})
-            $(bot_reply).attr({"value": obj.bot_reply, "name": "bot_reply"})
+            $(user_phrase).attr({"name": "user_phrase", "class": "form-text-place"})
+            $(bot_reply).attr({"name": "bot_reply", "class": "form-text-place"})
+            user_phrase.innerText = obj.user_phrase
+            bot_reply.innerText = obj.bot_reply
 
             $(id_input).attr({"value": obj.id, "name": "id", "hidden": true})
 
-            $(node).attr({"path_id": obj.path_id})
-            $(node).css({"margin-left": left+10+"px", "display": "block", "margin-top": top_offset+"px"})
+            $(node).attr({"path_id": obj.path_id, "class": "tree-node"})
+            $(node_container).css({"margin-left": left+"px"})
 
             for (let i in obj.children) {
 
-                node.appendChild(create_tree(obj.children[i], left+10));
+                node.appendChild(create_tree(obj.children[i], left+30));
 
             }
 
@@ -99,16 +122,19 @@
         }
 
         for (let i = 0; i < data.length; i++) {
-            tree.appendChild(create_tree(data[i], 0))
+            let node = create_tree(data[i], 0)
+            $(node).attr({"class": "tree-node tree-node-root"})
+            tree.appendChild(node)
         }
         const create_tree_button = document.createElement("button")
         tree.appendChild(create_tree_button)
-        create_tree_button.innerText = "Add message tree"
+        create_tree_button.innerText = "Добавить древо сообщений +"
         create_tree_button.addEventListener("click", function (ev) {
             return fetch("/create_message",
                 {method: "POST",
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({"path_id": NaN})});
+                    body: JSON.stringify({"path_id": NaN})}
+            ).then(() => {window.location.reload()})
         })
     </script>
 </body>

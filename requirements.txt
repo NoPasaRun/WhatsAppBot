@@ -11,3 +11,4 @@ jinja2
 sqlalchemy-utils~=0.38.2
 psycopg2-binary~=2.9.3
 python-multipart
+openpyxl~=3.0.10

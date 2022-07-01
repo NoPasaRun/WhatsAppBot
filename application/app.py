@@ -1,19 +1,35 @@
 import os
-from typing import Type, Callable
-import starlette.status as status
 import aiohttp
-from fastapi import FastAPI, Request, APIRouter, Form
+import secrets
+import openpyxl
+from fastapi import FastAPI, Request, APIRouter, Form, Depends, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import RedirectResponse, Response
+from fastapi.responses import RedirectResponse, Response, FileResponse
 import json
 from application.database import async_engine, Base, async_session
 from sqlalchemy import select, insert, update, delete, func
 from application.models import Message, User, Ltree
 from application.settings import root, config
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+
 
 app = FastAPI()
 router = APIRouter()
+security = HTTPBasic()
+
+
+def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
+    correct_username = secrets.compare_digest(credentials.username, config.get("username"))
+    correct_password = secrets.compare_digest(credentials.password, config.get("password"))
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
 
 app.mount("/static", StaticFiles(directory=os.path.join(root, "static")), name="static")
 templates = Jinja2Templates(directory="templates")
@@ -30,34 +46,15 @@ async def shutdown():
     await async_engine.dispose()
 
 
-def close_session(func: Callable):
-    async def wrapper(*args, **kwargs):
-        session = async_session()
-        args = (session, *args)
-        output = await func(*args, **kwargs)
-        await session.close()
-        return output
-    return wrapper
+@router.get("/admin", dependencies=[Depends(get_current_username)])
+async def admin_panel(request: Request) -> templates.TemplateResponse:
 
+    session = async_session()
 
-@router.route("/admin", methods=["GET", "POST"])
-@close_session
-async def admin_panel(session: async_session, request: Request) -> templates.TemplateResponse:
-    users = []
-    if request.method == "GET":
+    output = await session.execute(select(User))
+    users = [user for raw in output.fetchall() for user in raw]
 
-        output = await session.execute(select(User))
-        users = [user for raw in output.fetchall() for user in raw]
-
-    elif request.method == "POST":
-
-        b_data = await request.body()
-        data = json.loads(b_data.decode("utf-8"))
-
-        await session.execute(insert(User).values(data))
-        output = await session.execute(select(User))
-
-        users = [user for raw in output.fetchall() for user in raw]
+    await session.close()
 
     return templates.TemplateResponse(
         "admin.html", {
@@ -65,6 +62,40 @@ async def admin_panel(session: async_session, request: Request) -> templates.Tem
             "users": users
         }
     )
+
+
+def xlsx_file(users, file_path):
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = "users"
+
+    sheet["A1"].value = "Username"
+    sheet["B1"].value = "Phone number"
+
+    for row in range(len(users)):
+        for column, key in enumerate(["username", "phone_number"]):
+            cell = sheet.cell(row=row+2, column=column+1)
+            cell.value = getattr(users[row], key)
+    workbook.save(file_path)
+
+
+@router.post("/admin", dependencies=[Depends(get_current_username)])
+async def get_users_file(request: Request) -> FileResponse:
+
+    session = async_session()
+
+    output = await session.execute(select(User))
+
+    users = [user for raw in output.fetchall() for user in raw]
+
+    file_name = "users.xlsx"
+    file_location = os.path.join(root, f'media/{file_name}')
+
+    xlsx_file(users, file_location)
+
+    await session.close()
+
+    return FileResponse(path=file_location, filename=file_name)
 
 
 def list_to_data(data_list: list, data: list, dot_count: int = 0, path: str = "") -> list:
@@ -83,14 +114,17 @@ def list_to_data(data_list: list, data: list, dot_count: int = 0, path: str = ""
     return data
 
 
-@router.route("/bot_config", methods=["GET"])
-@close_session
-async def bot_configuration(session: async_session, request: Request) -> templates.TemplateResponse:
+@router.get("/bot_config", dependencies=[Depends(get_current_username)])
+async def bot_configuration(request: Request) -> templates.TemplateResponse:
+
+    session = async_session()
 
     output = await session.execute(select(Message))
 
     messages = [message for raw in output.fetchall() for message in raw]
     messages = list_to_data(messages, [])
+
+    await session.close()
 
     return templates.TemplateResponse(
         "messages.html",
@@ -101,9 +135,10 @@ async def bot_configuration(session: async_session, request: Request) -> templat
     )
 
 
-@router.route("/create_message", methods=["POST"])
-@close_session
-async def create_message(session: async_session, request: Request):
+@router.post("/create_message", dependencies=[Depends(get_current_username)])
+async def create_message(request: Request):
+
+    session = async_session()
 
     b_data = await request.body()
     data = json.loads(b_data.decode("utf-8"))
@@ -118,11 +153,12 @@ async def create_message(session: async_session, request: Request):
     session.add(message)
 
     await session.commit()
+    await session.close()
 
     return RedirectResponse(url="/bot_config", status_code=status.HTTP_303_SEE_OTHER)
 
 
-@router.post("/update_message")
+@router.post("/update_message", dependencies=[Depends(get_current_username)])
 async def update_message(id: int = Form(), user_phrase: str = Form(), bot_reply: str = Form()):
 
     session = async_session()
@@ -143,9 +179,10 @@ async def update_message(id: int = Form(), user_phrase: str = Form(), bot_reply:
     return Response("Frontend form was changed", status_code=400)
 
 
-@router.route("/delete_message", methods=["POST"])
-@close_session
-async def delete_message(session: async_session, request: Request):
+@router.delete("/delete_message", dependencies=[Depends(get_current_username)])
+async def delete_message(request: Request):
+
+    session = async_session()
 
     b_data = await request.body()
     data = json.loads(b_data.decode("utf-8"))
@@ -155,8 +192,10 @@ async def delete_message(session: async_session, request: Request):
 
     output = await session.execute(select(Message).filter(Message.path.descendant_of(message.path)))
     message_ids = [message.id for row in output.fetchall() for message in row]
+
     await session.execute(delete(Message).where(Message.id.in_(message_ids)))
     await session.commit()
+    await session.close()
 
     return RedirectResponse(url="/bot_config", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -173,9 +212,8 @@ async def get_message_from_bd(text, session):
     return output_text
 
 
-@router.route("/recived_messages", methods=["POST"])
-@close_session
-async def get_recived_messages(session: async_session, request: Request) -> tuple:
+@router.post("/recived_messages", dependencies=[Depends(get_current_username)])
+async def get_recived_messages(request: Request) -> tuple:
 
     b_data = await request.body()
     data = json.loads(b_data.decode("utf-8"))
@@ -190,7 +228,8 @@ async def get_recived_messages(session: async_session, request: Request) -> tupl
 
         return "Send by bot successfully", 200
 
-    # await session.execute(insert(User).values({"phone_number": phone_number}))
+    session = async_session()
+    await session.execute(insert(User).values({"phone_number": phone_number}))
 
     message = await get_message_from_bd(message, session)
 
@@ -202,6 +241,8 @@ async def get_recived_messages(session: async_session, request: Request) -> tupl
         async with http_session.post(url=url, data=json.dumps(message_data)) as response:
             content = await response.text()
             print(content)
+
+    await session.close()
 
     return content, response.status
 

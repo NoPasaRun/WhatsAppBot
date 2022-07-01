@@ -99,7 +99,7 @@ ul {
 
 .main-section__user-list {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     margin-top: 75px;
     overflow-y: scroll;
     height: 100vh;
@@ -108,8 +108,13 @@ ul {
 .user-info {
     width: 85%;
     height: 100px;
+    margin: 0 auto;
     background-color: #eae5de;
     border-radius: 20px;
+}
+
+.user-info:not(:last-child) {
+    margin-bottom: 20px;
 }
 
 .user-info:nth-child(n) {

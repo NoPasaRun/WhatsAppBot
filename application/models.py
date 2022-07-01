@@ -33,4 +33,5 @@ class Message(Base):
 class User(Base):
     __tablename__ = "users"
     id: int = Column(Integer(), primary_key=True)
-    phone_number = Column(String(11))
+    username = Column(String())
+    phone_number = Column(String())
