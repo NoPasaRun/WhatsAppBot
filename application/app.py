@@ -237,7 +237,7 @@ async def get_recived_messages(request: Request) -> tuple:
     try:
 
         message = data["messageData"]["textMessageData"]["textMessage"]
-        print(message)
+        print(data)
         username = data["messsageData"]["textMessageData"]["senderName"]
         phone_number = data["senderData"]["chatId"].replace("@c.us", "")
 
