@@ -1,0 +1,29 @@
+@media (max-width: 500px) {
+    .headers__heading {
+        font-size: 29px;
+    }
+
+    .headers-nav__link {
+        font-size: 14px;
+    }
+
+    .headers-nav__item:not(:last-child) {
+        margin-right: 5px;
+    }
+
+    .main-section__header {
+        font-size: 30px;
+    }
+
+    .user-info__list {
+        flex-direction: column;
+    }
+
+    .user-info {
+        height: auto;
+    }
+
+    .user-info__item {
+        margin-bottom: 10px;
+    }
+}

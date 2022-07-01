@@ -1,0 +1,10 @@
+@media (max-width: 500px) {
+
+    body {
+        background-color: brown;
+    }
+
+    body::before {
+        background-size: cover;
+    }
+}
