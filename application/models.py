@@ -1,5 +1,5 @@
 from application.database import Base, engine
-from sqlalchemy import Column, String, Integer, func, Sequence
+from sqlalchemy import Column, String, Integer, func, Sequence, select
 from sqlalchemy_utils import LtreeType, Ltree
 from sqlalchemy.orm import relationship, remote, foreign
 
@@ -35,3 +35,11 @@ class User(Base):
     id: int = Column(Integer(), primary_key=True)
     username = Column(String())
     phone_number = Column(String())
+
+    @classmethod
+    async def is_unique(cls, session, data):
+        output = await session.execute(select(cls).where(
+            cls.username == data["username"] and cls.phone_number == data["phone_number"])
+        )
+        return output.fethone() is None
+
