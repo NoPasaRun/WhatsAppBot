@@ -54,14 +54,17 @@
         </section>
     </main>
     <script>
-        const delete_button = document.querySelector(".user-info__delete-button")
-        delete_button.addEventListener("click", function (ev) {
-            return fetch("/delete_user",
-                    {method: "DELETE",
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({"id": this.value})}
-                ).then(() => {window.location.reload()})
-        })
+        const delete_buttons = document.querySelectorAll(".user-info__delete-button")
+        for (let button in delete_buttons) {
+            button.addEventListener("click", function (ev) {
+                console.log(this.value)
+                return fetch("/delete_user",
+                        {method: "DELETE",
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({"id": this.value})}
+                    ).then(() => {window.location.reload()})
+            })
+        }
     </script>
 </body>
 </html>
