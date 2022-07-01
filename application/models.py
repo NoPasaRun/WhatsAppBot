@@ -41,5 +41,5 @@ class User(Base):
         output = await session.execute(select(cls).where(
             cls.username == data["username"] and cls.phone_number == data["phone_number"])
         )
-        return output.fethone() is None
+        return output.fetchone() is None
 
