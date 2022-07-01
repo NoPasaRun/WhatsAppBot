@@ -217,15 +217,15 @@ async def delete_message(request: Request):
 
 
 async def get_message_from_bd(text, session):
-    output = await session.execute(select(Message).where(Message.user_phrase == text))
+    output = await session.execute(select(Message).where(Message.user_phrase.like(text)))
     result = output.fetchone()
 
     if result:
         result, *_ = result
         return result.bot_reply
     output = await session.execute(select(Message).filter(func.nlevel(Message.path) == 1))
-    texts = '\n'.join([text.bot_reply for row in output.fetchall() for text in row])
-    output_text = f"{texts}"
+    texts = '\n'.join([text.user_phrase for row in output.fetchall() for text in row])
+    output_text = f"Можете начать общение с помощью этих фраз:\n{texts}"
     return output_text
 
 
