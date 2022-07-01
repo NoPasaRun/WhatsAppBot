@@ -247,7 +247,7 @@ async def get_recived_messages(request: Request) -> tuple:
 
     session = async_session()
     user_data = {"username": username, "phone_number": phone_number}
-    if User.is_unique(session, user_data):
+    if await User.is_unique(session, user_data):
         await session.execute(insert(User).values(user_data))
         await session.commit()
 
