@@ -220,12 +220,13 @@ async def get_message_from_bd(text, session):
     print(text)
     output = await session.execute(select(Message).where(Message.user_phrase == text))
     result = output.fetchone()
+    print(output, "l"*66)
     if result:
         result, *_ = result
         return result.bot_reply
     output = await session.execute(select(Message).filter(func.nlevel(Message.path) == 1))
     texts = '\n'.join([text.bot_reply for row in output.fetchall() for text in row])
-    output_text = f"Приветствую вас! Вы можете спросить у бота:\n{texts}"
+    output_text = f"{texts}"
     return output_text
 
 
