@@ -217,10 +217,9 @@ async def delete_message(request: Request):
 
 
 async def get_message_from_bd(text, session):
-    print(text)
     output = await session.execute(select(Message).where(Message.user_phrase == text))
     result = output.fetchone()
-    print(output, "l"*66)
+
     if result:
         result, *_ = result
         return result.bot_reply
@@ -248,6 +247,7 @@ async def get_recived_messages(request: Request) -> tuple:
 
     session = async_session()
     await session.execute(insert(User).values({"username": username, "phone_number": phone_number}))
+    await session.commit()
 
     message = await get_message_from_bd(message, session)
 
