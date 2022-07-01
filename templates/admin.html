@@ -57,7 +57,7 @@
         const delete_buttons = document.querySelectorAll(".user-info__delete-button")
         for (let i = 0 ; i < delete_buttons.length; i++)  {
             delete_buttons[i].addEventListener("click", function (ev) {
-                console.log(this.value)
+                alert(this.value)
                 return fetch("/delete_user",
                         {method: "DELETE",
                             headers: {'Content-Type': 'application/json'},
