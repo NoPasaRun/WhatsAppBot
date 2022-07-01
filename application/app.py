@@ -217,6 +217,7 @@ async def delete_message(request: Request):
 
 
 async def get_message_from_bd(text, session):
+    print(text)
     output = await session.execute(select(Message).where(Message.user_phrase == text))
     result = output.fetchone()
     if result:
@@ -256,7 +257,6 @@ async def get_recived_messages(request: Request) -> tuple:
     async with aiohttp.ClientSession() as http_session:
         async with http_session.post(url=url, data=json.dumps(message_data)) as response:
             content = await response.text()
-            print(content)
 
     await session.close()
 
