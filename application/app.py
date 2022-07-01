@@ -217,7 +217,7 @@ async def delete_message(request: Request):
 
 
 async def get_message_from_bd(text, session):
-    output = await session.execute(select(Message).where(Message.user_phrase.like(text)))
+    output = await session.execute(select(Message).where(func.lower(Message.user_phrase).like(text)))
     result = output.fetchone()
 
     if result:
