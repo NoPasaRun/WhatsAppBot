@@ -55,6 +55,7 @@
     </main>
     <script>
         const delete_buttons = document.querySelectorAll(".user-info__delete-button")
+        console.log(delete_buttons)
         for (let button in delete_buttons) {
             button.addEventListener("click", function (ev) {
                 console.log(this.value)
