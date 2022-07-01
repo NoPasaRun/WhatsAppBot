@@ -236,7 +236,7 @@ async def get_recived_messages(request: Request) -> tuple:
     data = json.loads(b_data.decode("utf-8"))
 
     try:
-        print(data)
+
         message = data["messageData"]["textMessageData"]["textMessage"]
         username = data["senderData"]["senderName"]
         phone_number = data["senderData"]["chatId"].replace("@c.us", "")
@@ -253,11 +253,12 @@ async def get_recived_messages(request: Request) -> tuple:
 
     message = await get_message_from_bd(message, session)
 
-    url = f"https://biz.wapico.ru/api/send.php?number={phone_number}&type=text&message={message}&" \
-          f"instance_id={config['instance_id']}&access_token={config['access_token']}"
+    message_data = {"message": message, "chatId": phone_number + "@c.us"}
+
+    url = f"https://api.green-api.com/waInstance{config['IdInstance']}/SendMessage/{config['apiTokenInstance']}"
 
     async with aiohttp.ClientSession() as http_session:
-        async with http_session.post(url=url) as response:
+        async with http_session.post(url=url, data=json.dumps(message_data)) as response:
             content = await response.text()
 
     await session.close()
