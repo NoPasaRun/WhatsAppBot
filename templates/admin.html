@@ -43,6 +43,9 @@
                                 <li class="user-info__item">Идентификатор: {{user.id}}</li>
                                 <li class="user-info__item">Имя: {{user.username}}</li>
                                 <li class="user-info__item">Номер телефона: {{user.phone_number}}</li>
+                                <li class="user-info__item">
+                                    <button class="user-info__delete-button" value="{{ user.id }}"></button>
+                                </li>
                             </ul>
                         </div>
                     {% endfor %}
@@ -50,5 +53,15 @@
             </div>
         </section>
     </main>
+    <script>
+        const delete_button = document.querySelector(".user-info__delete-button")
+        delete_button.addEventListener("click", function (ev) {
+            return fetch("/delete_user",
+                    {method: "DELETE",
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({"id": this.value})}
+                ).then(() => {window.location.reload()})
+        })
+    </script>
 </body>
 </html>

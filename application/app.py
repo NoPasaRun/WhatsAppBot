@@ -179,6 +179,22 @@ async def update_message(id: int = Form(), user_phrase: str = Form(), bot_reply:
     return Response("Frontend form was changed", status_code=400)
 
 
+@app.delete("/delete_user", dependencies=[Depends(get_current_username)])
+async def delete_user(request: Request):
+
+    session = async_session()
+
+    b_data = await request.body()
+    data = json.loads(b_data.decode("utf-8"))
+
+    await session.execute(delete(User).where(User.id == data.get("id")))
+
+    await session.commit()
+    await session.close()
+
+    return RedirectResponse(url="/admin", status_code=status.HTTP_303_SEE_OTHER)
+
+
 @router.delete("/delete_message", dependencies=[Depends(get_current_username)])
 async def delete_message(request: Request):
 
@@ -222,6 +238,7 @@ async def get_recived_messages(request: Request) -> tuple:
 
         message = data["messageData"]["textMessageData"]["textMessage"]
         print(message)
+        username = data["messsageData"]["textMessageData"]["senderName"]
         phone_number = data["senderData"]["chatId"].replace("@c.us", "")
 
     except KeyError:
