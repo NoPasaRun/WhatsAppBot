@@ -187,7 +187,7 @@ async def delete_user(request: Request):
     b_data = await request.body()
     data = json.loads(b_data.decode("utf-8"))
 
-    await session.execute(delete(User).where(User.id == data.get("id")))
+    await session.execute(delete(User).where(User.id == int(data.get("id"))))
 
     await session.commit()
     await session.close()
