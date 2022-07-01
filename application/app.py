@@ -228,7 +228,7 @@ async def get_message_from_bd(text, session):
     return output_text
 
 
-@router.post("/recived_messages", dependencies=[Depends(get_current_username)])
+@router.post("/recived_messages")
 async def get_recived_messages(request: Request) -> tuple:
 
     b_data = await request.body()
