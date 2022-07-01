@@ -237,8 +237,7 @@ async def get_recived_messages(request: Request) -> tuple:
     try:
 
         message = data["messageData"]["textMessageData"]["textMessage"]
-        print(data)
-        username = data["messsageData"]["textMessageData"]["senderName"]
+        username = data["senderData"]["senderName"]
         phone_number = data["senderData"]["chatId"].replace("@c.us", "")
 
     except KeyError:
@@ -246,7 +245,7 @@ async def get_recived_messages(request: Request) -> tuple:
         return "Send by bot successfully", 200
 
     session = async_session()
-    await session.execute(insert(User).values({"phone_number": phone_number}))
+    await session.execute(insert(User).values({"username": username, "phone_number": phone_number}))
 
     message = await get_message_from_bd(message, session)
 
