@@ -1,0 +1,21 @@
+@media (max-width: 500px) {
+    .header__heading {
+        margin-left: 0;
+        font-size: 25px;
+        text-align: center;
+    }
+
+    .header__heading-info {
+        margin-left: 0;
+        font-size: 18px;
+        text-align: center;
+    }
+
+    .main__heading {
+        margin-bottom: 20px;
+    }
+
+    .notification__heading-content {
+        text-align: center;
+    }
+}

@@ -1,17 +1,22 @@
 import os
+import json
+import dotenv
+
 import aiohttp
 import secrets
 import openpyxl
+
+from sqlalchemy import select, insert, update, delete, func
+
 from fastapi import FastAPI, Request, APIRouter, Form, Depends, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse, Response, FileResponse
-import json
-from application.database import async_engine, Base, async_session
-from sqlalchemy import select, insert, update, delete, func
-from application.models import Message, User, Ltree
-from application.settings import root, config
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+
+from application.database import async_engine, Base, async_session
+from application.models import Message, User, Ltree
+from application.settings import root, config, config_file
 
 
 app = FastAPI()
@@ -19,7 +24,7 @@ router = APIRouter()
 security = HTTPBasic()
 
 
-def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
+def get_current_username(credentials: HTTPBasicCredentials = Depends(security)) -> str:
     correct_username = secrets.compare_digest(credentials.username, config.get("username"))
     correct_password = secrets.compare_digest(credentials.password, config.get("password"))
     if not (correct_username and correct_password):
@@ -64,7 +69,7 @@ async def admin_panel(request: Request) -> templates.TemplateResponse:
     )
 
 
-def xlsx_file(users, file_path):
+def xlsx_file(users: list, file_path: str) -> None:
     workbook = openpyxl.Workbook()
     sheet = workbook.active
     sheet.title = "users"
@@ -136,7 +141,7 @@ async def bot_configuration(request: Request) -> templates.TemplateResponse:
 
 
 @router.post("/create_message", dependencies=[Depends(get_current_username)])
-async def create_message(request: Request):
+async def create_message(request: Request) -> RedirectResponse:
 
     session = async_session()
 
@@ -180,7 +185,7 @@ async def update_message(id: int = Form(), user_phrase: str = Form(), bot_reply:
 
 
 @app.delete("/delete_user", dependencies=[Depends(get_current_username)])
-async def delete_user(request: Request):
+async def delete_user(request: Request) -> RedirectResponse:
 
     session = async_session()
 
@@ -196,7 +201,7 @@ async def delete_user(request: Request):
 
 
 @router.delete("/delete_message", dependencies=[Depends(get_current_username)])
-async def delete_message(request: Request):
+async def delete_message(request: Request) -> RedirectResponse:
 
     session = async_session()
 
@@ -216,16 +221,14 @@ async def delete_message(request: Request):
     return RedirectResponse(url="/bot_config", status_code=status.HTTP_303_SEE_OTHER)
 
 
-async def get_message_from_bd(text, session):
+async def get_message_from_bd(text, session) -> str:
     output = await session.execute(select(Message).where(func.lower(Message.user_phrase).like("%" + text.lower() + "%")))
     result = output.fetchone()
 
     if result:
         result, *_ = result
         return result.bot_reply
-    output = await session.execute(select(Message).filter(func.nlevel(Message.path) == 1))
-    texts = '\n'.join([text.user_phrase for row in output.fetchall() for text in row])
-    output_text = f"Можете начать общение с помощью этих фраз:\n{texts}"
+    output_text = config["text"]
     return output_text
 
 
@@ -247,6 +250,7 @@ async def get_recived_messages(request: Request) -> tuple:
 
     session = async_session()
     user_data = {"username": username, "phone_number": phone_number}
+
     if await User.is_unique(session, user_data):
         await session.execute(insert(User).values(user_data))
         await session.commit()
@@ -264,6 +268,28 @@ async def get_recived_messages(request: Request) -> tuple:
     await session.close()
 
     return content, response.status
+
+
+@router.get("/app_config", dependencies=[Depends(get_current_username)])
+async def get_config_configuration(request: Request):
+
+    current_config = dotenv.dotenv_values(config_file)
+
+    return templates.TemplateResponse(
+        "config.html", {"request": request, "config": current_config.items()}
+    )
+
+
+@router.post("/app_config", dependencies=[Depends(get_current_username)])
+async def update_config_configuration(request: Request) -> RedirectResponse:
+
+    b_data = await request.body()
+    data = json.loads(b_data.decode("utf-8"))
+
+    for key, value in data.items():
+        dotenv.set_key(config_file, key, value)
+
+    return RedirectResponse("/app_config", status_code=status.HTTP_303_SEE_OTHER)
 
 
 app.include_router(router, prefix="")

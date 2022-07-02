@@ -3,4 +3,5 @@ from dotenv import dotenv_values
 
 
 root = os.path.realpath(".")
-config = dotenv_values(os.path.join(root, ".env"))
+config_file = os.path.join(root, ".env")
+config = dotenv_values(config_file)

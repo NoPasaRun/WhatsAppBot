@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Finlandica:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: rgb(39, 30, 158);
+    min-height: 100vh;
+    position: relative;
+}
+
+body::after {
+    content: "";
+    z-index: -1;
+    background-image: url('/static/images/body-bg.jpg');
+    background-attachment: fixed;
+    background-position: center;
+    background-size: contain;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    opacity: 0.65;
+}
+
+.header {
+    background-image: url('/static/images/header-bg.jpg');
+    background-repeat: no-repeat;
+    background-size: cover contain;
+    background-position: center center;
+    font-family: 'Finlandica', sans-serif;
+}
+
+@keyframes shadow {
+    from {text-shadow: 1px 1px 10px rgb(142, 79, 184), 1px 1px 10px rgb(142, 79, 184)}
+    50% {text-shadow: 1px 1px 10px rgb(219, 206, 228), 1px 1px 10px rgb(219, 206, 228)}
+    to {text-shadow: 1px 1px 10px rgb(142, 79, 184), 1px 1px 10px rgb(142, 79, 184)}
+}
+
+.header__heading {
+    color: rgba(186, 101, 197, 0.8);
+    animation: shadow  2s infinite ease-in-out;
+    margin-bottom: 15px;
+    font-size: 30px;
+}
+
+.header__heading-info {
+    color:rgba(255, 17, 215, 0.8);
+    text-shadow: 1px 1px 1px rgb(41, 3, 33), 1px 1px 1px rgb(46, 3, 33);
+    font-weight: 600;
+    max-width: 600px;
+    padding-bottom: 25px;
+}
+
+.header__heading,
+.header__heading-info {
+    margin-left: 100px;
+}
+
+.wrapper {
+    text-align: center;
+    width: 80%;
+    margin: 100px auto 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.main {
+    padding-bottom: 100px;
+}
+
+.main__heading {
+    color:rgb(46, 3, 33);
+    font-family: 'Oswald', sans-serif;
+    font-size: 25px;
+}
+
+.notification {
+    margin-left: auto;
+    font-size: 20px;
+    color:rgb(46, 3, 33);
+    font-family: 'Oswald', sans-serif;
+    max-width: 400px;
+    margin-bottom: 50px;
+}
+
+.notification__heading-text {
+    font-weight: 700;
+    font-size: 20px;;
+}
+
+.notification__heading-content {
+    text-align: left;
+    font-weight: 700;
+}
+
+.form-block {
+    display: flex;
+    flex-direction: column;
+    max-width: 600px;
+    margin: 0 auto;
+    font-family: 'Oswald', sans-serif;
+    align-items: center;
+}
+
+.config-label {
+    color:rgba(255, 17, 215, 0.8);
+    text-shadow: 1px 1px 1px rgb(41, 3, 33), 1px 1px 1px rgb(46, 3, 33);
+    font-size: 30px;
+}
+
+.config-data__input {
+    height: 50px;
+    background-color: blueviolet;
+    min-width: 100%;
+}
+
+.send-config-data {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    background-image: url('/static/images/gear.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    border-radius: 50%;
+    transition: 0.2s ease-in-out;
+    margin-top: 20px;
+}
+
+.send-config-data:hover {
+    transform: rotate(360deg);
+}
+
+.send-config-data:active {
+    transform: translateY(5px);
+}

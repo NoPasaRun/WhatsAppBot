@@ -11,6 +11,13 @@
         margin-right: 5px;
     }
 
+    .headers-nav__burger-button {
+        display: inline-block;
+        width: 60px;
+        height: 40px;
+        cursor: pointer;
+    }
+
     .main-section__header {
         font-size: 30px;
     }

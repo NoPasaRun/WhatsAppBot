@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/static/styles/normalize.css">
+    <link rel="stylesheet" href="/static/styles/config.css">
+    <link rel="stylesheet" href="/static/styles/config-media.css">
+    <title>Конфигурация</title>
+</head>
+<body>
+    <header class="header">
+        <div class="header-wrapper">
+            <h2 class="header__heading">Конфигурация приложения</h2>
+            <p class="header__heading-info">
+                Здесь можно настроить параметры приложения:
+                Логин и пароль для админки, сообщение-заглушка
+                для отправки новым пользователям, настройки
+                для запуска бота.
+            </p>
+        </div>
+    </header>
+    <main class="main">
+        <section class="main-section">
+            <div class="wrapper">
+                <h4 class="main__heading">Форма для отправки</h4>
+                <div class="notification">
+                    <h6 class="notification__heading-block"><strong class="notification__heading-text">Внимание!</strong></h6>
+                    <p class="notification__heading-content">
+                        После обновления данных следует перезапустить приложение.
+                        Как это сделать, смотреть в документации к проекту!
+                    </p>
+                </div>
+                <div class="form-wrapper">
+                    <div class="form-block">
+                        {% for name, value in config %}
+                            <label class="config-label">{{ name }}: </label>
+                            <input name="{{ name }}" value="{{ value }}" class="config-data__input" type="text" />
+                        {% endfor %}
+                        <button class="send-config-data"></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script>
+        const button = document.querySelector(".send-config-data")
+        const data_fields = document.querySelectorAll(".config-data__input")
+        button.addEventListener("click", function (ev) {
+            let data = {}
+            for (let i = 0; i < data_fields.length; i++) {
+                let [key, value] = [data_fields[i].getAttribute("name"), data_fields[i].value]
+                data[key] = value
+            }
+            return fetch("/app_config",
+                {method: "POST",
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)}
+            ).then(() => {window.location.reload()})
+        })
+    </script>
+</body>
+</html>

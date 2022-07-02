@@ -27,7 +27,13 @@
                                 Настроить ответы бота
                             </a>
                         </li>
+                        <li class="headers-nav__item">
+                            <a href="/app_config" class="headers-nav__link">
+                                Настройки приложения
+                            </a>
+                        </li>
                     </ul>
+                    <button class="headers-nav__burger-button">Update</button>
                 </nav>
             </div>
         </div>
@@ -56,6 +62,8 @@
     </main>
     <script>
         const delete_buttons = document.querySelectorAll(".user-info__delete-button")
+        const burger_button = document.querySelector(".headers-nav__burger-button")
+        const links_list = document.querySelector(".header-nav__list")
         for (let i = 0 ; i < delete_buttons.length; i++)  {
             delete_buttons[i].addEventListener("click", function (ev) {
                 return fetch("/delete_user",
@@ -65,6 +73,9 @@
                     ).then(() => {window.location.reload()})
             })
         }
+        burger_button.addEventListener("click", function(ev) {
+            links_list.classList.toggle('hidden-list')
+        })
     </script>
 </body>
 </html>

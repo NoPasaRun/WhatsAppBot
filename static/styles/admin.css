@@ -50,6 +50,10 @@ ul {
     justify-content: space-around;
 }
 
+.hidden-list {
+    display: none;
+}
+
 .headers-nav__item:not(:last-child) {
     margin-right: 50px;
 }
