@@ -3,6 +3,16 @@
         font-size: 29px;
     }
 
+    .header-nav__list {
+        position: absolute;
+        flex-direction: column;
+        min-height: 150px;
+        justify-content: space-around;
+        background-color: rgba(255, 255, 255, 0.3);
+        z-index: 1;
+        transform: translate(-25px, 50px);
+    }
+
     .headers-nav__link {
         font-size: 14px;
     }
@@ -13,9 +23,16 @@
 
     .headers-nav__burger-button {
         display: inline-block;
-        width: 60px;
-        height: 40px;
+        width: 70px;
+        height: 50px;
         cursor: pointer;
+        background-color: transparent;
+        border: none;
+        outline: none;
+        filter: brightness(50%);
+        background-image: url('/static/images/menu.svg');
+        background-repeat: no-repeat;
+        background-image: contain;
     }
 
     .main-section__header {

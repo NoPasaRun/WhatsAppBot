@@ -37,6 +37,10 @@ ul {
     font-family: 'Fira Sans Condensed', sans-serif;
 }
 
+.header-nav {
+    position: relative;
+}
+
 .wrapper_row-content {
     display: flex;
     justify-content: space-around;
