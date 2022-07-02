@@ -5,12 +5,12 @@
 
 <h2>Деплой</h2>
 
-<p>Проект находится на сервере платформы heroku</p>
+<p>Проект находится на сервере платформы RuVDS</p>
 <strong>Данные аккаунта</strong>
 <ul>
-    <li>Почта: darkweberty@mail.ru</li>
-    <li>Пароль: eAY$aIYyiy11</li><br>
-    <i>Такие же данные для аккаунта почты</i>
+    <li>Host: 194.87.94.209</li>
+    <li>Password: eR33CmXz5F</li>
+    <li>User: root</li>
 </ul>
 
 <h2>Конфигурация приложения</h2>
@@ -28,52 +28,37 @@
 
 <h2>Перезапуск приложения</h2>
 
-<h4>1. Установка heroku</h4>
+<h4>1. Подключение к хосту</h4>
 
 <p>
 Windows
 
-Скачиваем .exe файл (<a href="https://cli-assets.heroku.com/heroku-x64.exe">x64</a> / <a href="https://cli-assets.heroku.com/heroku-x86.exe">x32</a>)
-и устанавливаем heroku
-</p>
-<p>
-mac OS
-
-Вводим команду <code>rew tap heroku/brew && brew install heroku</code> и устанавливаем heroku
-
-</p>
-<p>
-Linux
-
-Вводим команду <code>sudo apt-get install heroku</code> и устанавливаем heroku
-
+Вводим команду в cmd / терминале ssh root@194.87.94.209
+После чего программа запросит пароль. Вводим eR33CmXz5F
 </p>
 
-<h4>2. Логинимся</h4>
+<h4>2. Устанавливаем callback url</h4>
 
 <p>
-Пишем команду в cmd / терминале <code>heroku login</code>; программа запросит данные для аутентификации
-- вводим логин и пароль, указанные в разделе Деплой
+Если по каким-то причинам утилита ngrok перестала работать
+пишем команду <code>ngrok http 8000 --log=stdout > ngrok.log &</code>
+Пишем <code>cat ngrok.log</code> и достаем последний url. Этот url
+вставляем в callback url нашего инстанса Green API
 </p>
-
-<h4>3. Перезапуск приложения</h4>
 
 <p>
-Если ничего до этого момента не сломалось, осталось только ввести следующую команду
-<code>heroku restart --app fastapi-whatsappbot</code>, где fastapi-whatsappbot наше приложение
+Если упало приложение пишем <code>supervisorctl restart all</code>
 </p>
-
-<i><code>heroku logs --tail --app fastapi-whatsappbot</code> для отслеживания логов</i><br>
-<i><a href="https://devcenter.heroku.com/articles/heroku-cli#download-and-install">Если что-то пойдет не так, переходите на оф сайт с документацией</a></i>
 
 <h2>Сведения о приложении</h2>
 
 <ul>
-    <li><a href="https://fastapi-whatsappbot.herokuapp.com/">Основной url веб-сервиса</a></li>
-    <li><a href="https://fastapi-whatsappbot.herokuapp.com/admin">Админка</a></li>
-    <li><a href="https://fastapi-whatsappbot.herokuapp.com/bot_config">Конфигурация бота</a></li>
-    <li><a href="https://fastapi-whatsappbot.herokuapp.com/app_config">Конфигурация приложения</a></li>
+    <li><a href="http://194.87.94.209:8000/">Основной url веб-сервиса</a></li>
+    <li><a href="http://194.87.94.209:8000/admin">Админка</a></li>
+    <li><a href="http://194.87.94.209:8000/bot_config">Конфигурация бота</a></li>
+    <li><a href="http://194.87.94.209:8000/app_config">Конфигурация приложения</a></li>
+    <li><a href="http://194.87.94.209:8000/docs"></a></li>
 </ul>
 <p>Приложение написано на фрэймворке FastAPI</p>
 
-<p>Спасибо за внмание!</p>
+<p>Спасибо за внимание!</p>
